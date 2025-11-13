@@ -196,9 +196,18 @@ def map_column_names(df, expected_cols):
 # -------------------------
 # Data processing functions
 # -------------------------
-def update_allocation_history(merged_table, history_file, selected_date):    try:        if merged_table is None or merged_table.empty:            print("Merged table is empty or None. Skipping history update.")            return
-        merged_table = merged_table.copy()        merged_table['Date'] = selected_date        merged_table = merged_table[['Client', 'Sow', 'No. of Employees', 'Date']]        merged_table['Sow'] = merged_table['Sow'].astype(SOW_CAT_TYPE)
-        if os.path.exists(history_file):            try:                history_df = pd.read_excel(history_file, sheet_name='History', engine='openpyxl')                print("Existing history file loaded.")            except Exception as read_error:                print(f"Failed to read existing history file: {read_error}")                history_df = pd.DataFrame(columns=['Client', 'Sow', 'No. of Employees', 'Date'])        else:            print("History file not found. Creating new history file.")            history_df = pd.DataFrame(columns=['Client', 'Sow', 'No. of Employees', 'Date'])
+def update_allocation_history(merged_table, history_file, selected_date):
+  try:
+    if merged_table is None or merged_table.empty:
+      print("Merged table is empty or None. Skipping history update.")
+      return
+    merged_table = merged_table.copy()
+    merged_table['Date'] = selected_date
+    merged_table = merged_table[['Client', 'Sow', 'No. of Employees', 'Date']]
+    merged_table['Sow'] = merged_table['Sow'].astype(SOW_CAT_TYPE)
+    if os.path.exists(history_file):
+      try:
+        history_df = pd.read_excel(history_file, sheet_name='History', engine='openpyxl')                print("Existing history file loaded.")            except Exception as read_error:                print(f"Failed to read existing history file: {read_error}")                history_df = pd.DataFrame(columns=['Client', 'Sow', 'No. of Employees', 'Date'])        else:            print("History file not found. Creating new history file.")            history_df = pd.DataFrame(columns=['Client', 'Sow', 'No. of Employees', 'Date'])
         history_df['Date'] = pd.to_datetime(history_df['Date'], errors='coerce').dt.date
         merged_table['is_duplicate'] = merged_table.apply(            lambda row: (                (history_df['Client'] == row['Client']) &                (history_df['Sow'] == row['Sow']) &                (history_df['No. of Employees'] == row['No. of Employees']) &                (history_df['Date'] == row['Date'])            ).any(),            axis=1        )
         new_rows = merged_table[~merged_table['is_duplicate']].drop(columns='is_duplicate')        if new_rows.empty:            print("All rows for today already exist in history. Skipping save operation.")            return        else:            print(f"Appending {len(new_rows)} new rows to history.")            history_df = pd.concat([history_df, new_rows], ignore_index=True)
