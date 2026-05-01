@@ -83,7 +83,11 @@ def df_to_html_with_row_color(df, color_col, apply_color=True):
   html_parts.append('<tr>' + ''.join(f'<th>{col}</th>' for col in df.columns) + '</tr>')
   for _, row in df.iterrows():
     bg_style = f'background-color:{color_map.get(row.get(color_col), "")};' if apply_color else ''
-    row_html = ''.join(f'<td style="{bg_style} text-align:center;">{row[col]}</td>' for col in df.columns)        html_parts.append(f'<tr>{row_html}</tr>')
+    row_html = ''.join(
+      f'<td style="{bg_style} text-align:center;">{row[col]}</td>'
+      for col in df.columns
+    )
+    html_parts.append(f'<tr>{row_html}</tr>')
     html_parts.append('</table>')
   return ''.join(html_parts)
 
@@ -965,7 +969,7 @@ class ExcelPivotApp(QtWidgets.QWidget):
               f"{headcount_summary_today_html}<br><br>"
               f"If you have any questions or need further analysis, please feel free to reach out.<br><br>"
               f"Best regards,<br>"
-              f"{Sender's name}<br>"
+              f"{'Sender name'}<br>"
               f"</div>"
             )
               
